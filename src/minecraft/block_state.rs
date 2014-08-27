@@ -167,6 +167,68 @@ impl BlockStates {
                 random_offset = RandomOffsetXZ;
             }
 
+            if variant == "east=false,north=false,south=false,west=false" {
+                let pick = |variant| {
+                    last_id += 1;
+                    extras.push(Description {
+                        id: last_id,
+                        name: name,
+                        variant: Slice(variant),
+                        random_offset: NoRandomOffset,
+                        polymorph_oracle: vec![]
+                    });
+                    PickBlockState(last_id)
+                };
+                polymorph_oracle = vec![
+                  /* 00 */  IfBlockOrSolid(DirEast, 0, 16),
+                  /* 01 */      IfBlockOrSolid(DirNorth, 0, 9),
+                  /* 02 */          IfBlockOrSolid(DirSouth, 0, 6),
+                  /* 03 */              IfBlockOrSolid(DirWest, 0, 5),
+                  /* 04 */                  pick("east=true,north=true,south=true,west=true"),
+                                    //  else (!W)
+                  /* 05 */                  pick("east=true,north=true,south=true,west=false"),
+                                //  else (!S)
+                  /* 06 */              IfBlockOrSolid(DirWest, 0, 8),
+                  /* 07 */                  pick("east=true,north=true,south=false,west=true"),
+                                    //  else (!W)
+                  /* 08 */                  pick("east=true,north=true,south=false,west=false"),
+                            //  else (!N)
+                  /* 09 */          IfBlockOrSolid(DirSouth, 0, 13),
+                  /* 10 */              IfBlockOrSolid(DirWest, 0, 12),
+                  /* 11 */                  pick("east=true,north=false,south=true,west=true"),
+                                    //  else (!W)
+                  /* 12 */                  pick("east=true,north=false,south=true,west=false"),
+                                //  else (!S)
+                  /* 13 */              IfBlockOrSolid(DirWest, 0, 15),
+                  /* 14 */                  pick("east=true,north=false,south=false,west=true"),
+                                    //  else (!W)
+                  /* 15 */                  pick("east=true,north=false,south=false,west=false"),
+                        //  else (!E)
+                  /* 16 */      IfBlockOrSolid(DirNorth, 0, 24),
+                  /* 17 */          IfBlockOrSolid(DirSouth, 0, 21),
+                  /* 18 */              IfBlockOrSolid(DirWest, 0, 20),
+                  /* 19 */                  pick("east=false,north=true,south=true,west=true"),
+                                    //  else (!W)
+                  /* 20 */                  pick("east=false,north=true,south=true,west=false"),
+                                //  else (!S)
+                  /* 21 */              IfBlockOrSolid(DirWest, 0, 23),
+                  /* 22 */                  pick("east=false,north=true,south=false,west=true"),
+                                    //  else (!W)
+                  /* 23 */                  pick("east=false,north=true,south=false,west=false"),
+                            //  else (!N)
+                  /* 24 */          IfBlockOrSolid(DirSouth, 0, 28),
+                  /* 25 */              IfBlockOrSolid(DirWest, 0, 27),
+                  /* 26 */                  pick("east=false,north=false,south=true,west=true"),
+                                    //  else (!W)
+                  /* 27 */                  pick("east=false,north=false,south=true,west=false"),
+                                //  else (!S)
+                  /* 28 */              IfBlockOrSolid(DirWest, 0, 30),
+                  /* 29 */                  pick("east=false,north=false,south=false,west=true"),
+                                    //  else (!W)
+                  /* 30 */                  pick("east=false,north=false,south=false,west=false")
+                ];
+            }
+
             let variant = if variant.ends_with(",shape=outer_right") {
                 Owned(format!("{}=straight", variant.slice_to(variant.len() - 12)))
             } else {
